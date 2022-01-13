@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "TODO"
+Description: "Create EC2 for script execution"
+Metadata:
+  EC2Instance:
+    Description: "Description goes here"
+Parameters:
+  KeyNameParameter:
+    Type: String
+    Description: Enter key name
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+    Description: Enter t2.micro, t2.small, t2.medium. Default is t2.micro.
+  ImageIdParameter:
+    Type: String
+    Default: ami-0742b4e673072066f
+    AllowedValues:
+      - ami-0742b4e673072066f
+      - ami-042e8287309f5df03 
+    Description: ami-0742b4e673072066f is Amazon Linux 2 x86 in us-east-1, ami-042e8287309f5df03 is x86 Ubuntu 20.04 in us-east-1 
+Resources:
+    IAMRole5:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/"
+            # RoleName: "CloudWatchFullAccess-AWSvsNewRelic"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            ManagedPolicyArns: 
+              - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+            Description: "Allows EC2 instances to call AWS services on your behalf."
+    IAMProfile5:
+        Type: "AWS::IAM::InstanceProfile"
+        Properties:
+            Path: "/"
+            Roles:
+            - Ref: IAMRole5
+    DemoSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+          VpcId: "vpc-d88a99be"
+          # VpcId: !Ref VpcId
+          GroupDescription: Demo Security Group For Single Host
+          SecurityGroupIngress:
+          - CidrIp: 0.0.0.0/0
+            FromPort: 22
+            IpProtocol: tcp
+            ToPort: 22
+          - CidrIp: 0.0.0.0/0
+            FromPort: 9100
+            IpProtocol: tcp
+            ToPort: 9100
+          - CidrIp: 0.0.0.0/0
+            FromPort: 9090
+            IpProtocol: tcp
+            ToPort: 9090
+          - CidrIp: 0.0.0.0/0
+            FromPort: 3000
+            IpProtocol: tcp
+            ToPort: 3000
+          - CidrIp: 0.0.0.0/0
+            FromPort: 3100
+            IpProtocol: tcp
+            ToPort: 3100
+    EC2Instance:
+        Type: "AWS::EC2::Instance"
+        Metadata:
+              AWS::CloudFormation::Init:
+                config:
+                  files:
+                    /tmp/cfinit.txt:
+                      content: !Sub |
+                        did we make it here?
+                      mode: "000644"
+                      owner: "root"
+                      group: "root"
+        Properties:
+            IamInstanceProfile: !Ref IAMProfile5
+            ImageId: !Ref ImageIdParameter
+            InstanceType: !Ref InstanceTypeParameter
+            KeyName: !Ref KeyNameParameter 
+            AvailabilityZone: "us-east-1b"
+            SubnetId: "subnet-1792365f"
+            BlockDeviceMappings:
+              - DeviceName: /dev/xvda
+                Ebs:
+                  VolumeSize: 20
+            EbsOptimized: false
+            SecurityGroupIds: 
+              - !Ref DemoSecurityGroup     
+              #- "sg-14ae545d"
+            SourceDestCheck: true
+            UserData:
+             Fn::Base64: !Sub |
+                 #!/bin/bash -ex
+               
+                 # STEP 1: basic udpates
+                 yum update -y
+                 yum install git -y
+                 # yum install stress stress-ng -y
+                 
+                 # STEP 7: Install Docker
+                 amazon-linux-extras install docker
+                 service docker start
+                 usermod -a -G docker ec2-user
+                 
+                 # STEP 8: Run node exporter, prometheus, and grafana as docker containers
+                 ## docker run -d   --net="host"   --pid="host"   -v "/:/host:ro,rslave"   quay.io/prometheus/node-exporter:latest   --path.rootfs=/host
+                 docker run -d -p 9100:9100 --net="host" prom/node-exporter
+                 docker run --name prometheus -d -p 9090:9090 prom/prometheus
+                 docker run -d -p 3000:3000 grafana/grafana
+                 
+            Tags: 
+              - 
+                Key: "Name"
+                Value: !Join [ "-", ["Sandbox", !Ref AWS::StackName ] ]
+                #Value: "Cloudwatch sandbox"
+                #Value: !Join [ "-", [!Ref EC2Instance, !Ref AWS::StackName ] ]
+              - 
+                Key: "Project"
+                Value: "aws-vs-new-relic"   
+Outputs:
+  EC2InstanceOutput:
+    Description: "The Instance ID of the EC2"
+    Value: !Ref EC2Instance
+  EC2InstancePrivateIP:
+    Description: "The Private IP of the EC2"
+    Value: !GetAtt EC2Instance.PrivateIp
+  EC2InstancePublicIP:
+    Description: "The Public IP of the EC2"
+    Value: !GetAtt EC2Instance.PublicIp
+  EC2InstanceExpandedOutput:
+    Description: "The Instance ID of the EC2"
+    Value: !Join [ "-", [!Ref EC2Instance, !Ref AWS::StackName ] ]

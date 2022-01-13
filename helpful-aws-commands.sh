@@ -1,4 +1,7 @@
 #!/bin/bash
+### Generate EC2 Key pair
+aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text > MyKeyPair.pem
+
 alias acf='aws cloudformation'
 acf validate-template --template-body file://vpc.yaml
 # acf create-stack --template-body file://vpc.yaml --stack-name myvpc
