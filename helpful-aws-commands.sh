@@ -1,4 +1,7 @@
 #!/bin/bash
+
+### commit
+git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 ### Generate EC2 Key pair
 aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text > MyKeyPair.pem
 
