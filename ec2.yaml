@@ -24,6 +24,18 @@ Parameters:
       - ami-0742b4e673072066f
       - ami-042e8287309f5df03 
     Description: ami-0742b4e673072066f is Amazon Linux 2 x86 in us-east-1, ami-042e8287309f5df03 is x86 Ubuntu 20.04 in us-east-1 
+  VpcIdParameter:
+    Type: String
+    Default: vpc-0d6914bf26dffaf27
+    Description: VPC Id, typically in sandbox AWS account, so default id is likely invalid
+  SubnetIdParameter:
+    Type: String
+    Default: subnet-0c160d8d51e59e6a6 
+    Description: Subnet Id, typically in sandbox AWS account, so default id is likely invalid
+  AZParameter:
+    Type: String
+    Default: us-east-1a
+    Description: AZ, typically in sandbox AWS account, so default id is likely invalid
 Resources:
     IAMRole5:
         Type: "AWS::IAM::Role"
@@ -44,8 +56,8 @@ Resources:
     DemoSecurityGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
-          VpcId: "vpc-d88a99be"
-          # VpcId: !Ref VpcId
+          #VpcId: "vpc-d88a99be"
+          VpcId: !Ref VpcIdParameter
           GroupDescription: Demo Security Group For Single Host
           SecurityGroupIngress:
           - CidrIp: 0.0.0.0/0
@@ -85,8 +97,10 @@ Resources:
             ImageId: !Ref ImageIdParameter
             InstanceType: !Ref InstanceTypeParameter
             KeyName: !Ref KeyNameParameter 
-            AvailabilityZone: "us-east-1b"
-            SubnetId: "subnet-1792365f"
+            # AvailabilityZone: "us-east-1b"
+            AvailabilityZone: !Ref AZParameter
+            # SubnetId: "subnet-1792365f"
+            SubnetId: !Ref SubnetIdParameter 
             BlockDeviceMappings:
               - DeviceName: /dev/xvda
                 Ebs:
@@ -109,13 +123,6 @@ Resources:
                  amazon-linux-extras install docker
                  service docker start
                  usermod -a -G docker ec2-user
-                 
-                 # STEP 8: Run node exporter, prometheus, and grafana as docker containers
-                 ## docker run -d   --net="host"   --pid="host"   -v "/:/host:ro,rslave"   quay.io/prometheus/node-exporter:latest   --path.rootfs=/host
-                 docker run -d -p 9100:9100 --net="host" prom/node-exporter
-                 docker run --name prometheus -d -p 9090:9090 prom/prometheus
-                 docker run -d -p 3000:3000 grafana/grafana
-                 
             Tags: 
               - 
                 Key: "Name"
