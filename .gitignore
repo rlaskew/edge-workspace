@@ -1,3 +1,7 @@
+# edge-workspace specific
+*.zip
+lambda/out
+
 # new relic specific
 newrelic.ini
 
