@@ -3,7 +3,7 @@
 ### commit
 git config --global user.email "you@example.com" && git config --global user.name "Your Name"
 ### Generate EC2 Key pair
-aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text > MyKeyPair.pem
+aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text > MyKeyPair.pem && chmod 0600 MyKeyPair.pem
 
 alias acf='aws cloudformation'
 acf validate-template --template-body file://vpc.yaml
@@ -18,3 +18,6 @@ aws ec2 describe-subnets | jq .Subnets[0]
 
 ## create ec2
 acf create-stack --template-body file://ec2.yaml --region us-east-1 --stack-name ec2-take1 --parameter ParameterKey=KeyNameParameter,ParameterValue=MyKeyPair --capabilities CAPABILITY_IAM
+
+## create vpc with target ec2
+acf create-stack --template-body file://vpc-plus-target-ec2.yaml --stack-name myvpc-plus-ec2 --region us-east-1 --parameter ParameterKey=EnvironmentName,ParameterValue=dev ParameterKey=KeyNameParameter,ParameterValue=MyKeyPair --capabilities CAPABILITY_IAM
