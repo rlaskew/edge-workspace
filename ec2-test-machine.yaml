@@ -2,9 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Metadata:
     Generator: "TODO"
 Description: "Create EC2 for script execution"
-Metadata:
-  EC2Instance:
-    Description: "Description goes here"
 Parameters:
   KeyNameParameter:
     Type: String

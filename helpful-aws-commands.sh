@@ -21,3 +21,6 @@ acf create-stack --template-body file://ec2.yaml --region us-east-1 --stack-name
 
 ## create vpc with target ec2
 acf create-stack --template-body file://vpc-plus-target-ec2.yaml --stack-name myvpc-plus-ec2 --region us-east-1 --parameter ParameterKey=EnvironmentName,ParameterValue=dev ParameterKey=KeyNameParameter,ParameterValue=MyKeyPair --capabilities CAPABILITY_IAM
+
+## ec2 test machine
+acf create-stack --template-body file://ec2-test-machine.yaml --region us-east-1 --stack-name ec2-test-machine-take1 --parameter ParameterKey=KeyNameParameter,ParameterValue=MyKeyPair ParameterKey=VpcIdParameter,ParameterValue=vpc-0527dd8f203a08540 ParameterKey=SubnetIdParameter,ParameterValue=subnet-00f7fb9fcfbe4edfc ParameterKey=AZParameter,ParameterValue=us-east-1a --capabilities CAPABILITY_IAM
