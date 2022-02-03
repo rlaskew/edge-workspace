@@ -3,7 +3,7 @@
 lambda/out
 
 # new relic specific
-newrelic.ini
+# newrelic.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
