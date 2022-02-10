@@ -28,4 +28,4 @@ acf create-stack --template-body file://ec2-test-machine.yaml --region us-east-1
 	--parameter ParameterKey=KeyNameParameter,ParameterValue=MyKeyPair \
        	ParameterKey=VpcIdParameter,ParameterValue=${VPC_ID} \
        	ParameterKey=SubnetIdParameter,ParameterValue=${SUBNET_ID} \
-       	ParameterKey=AZParameter,ParameterValue=us-east-1a --capabilities CAPABILITY_IAM
+       	ParameterKey=AZParameter,ParameterValue=us-east-1a --capabilities CAPABILITY_IAM 

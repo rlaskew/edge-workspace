@@ -23,16 +23,20 @@ Parameters:
     Description: ami-0742b4e673072066f is Amazon Linux 2 x86 in us-east-1, ami-042e8287309f5df03 is x86 Ubuntu 20.04 in us-east-1 
   VpcIdParameter:
     Type: String
-    Default: vpc-0d6914bf26dffaf27
+    Default: vpc-0d97c362a89da1538 
     Description: VPC Id, typically in sandbox AWS account, so default id is likely invalid
   SubnetIdParameter:
     Type: String
-    Default: subnet-0c160d8d51e59e6a6 
+    Default: subnet-024bc978ff6547694 
     Description: Subnet Id, typically in sandbox AWS account, so default id is likely invalid
   AZParameter:
     Type: String
     Default: us-east-1a
     Description: AZ, typically in sandbox AWS account, so default id is likely invalid
+Mappings:
+  RegionMap:
+    us-east-1: 
+      ALL: ami-0742b4e673072066f
 Resources:
     IAMRole5:
         Type: "AWS::IAM::Role"
@@ -65,7 +69,8 @@ Resources:
         Type: "AWS::EC2::Instance"
         Properties:
             IamInstanceProfile: !Ref IAMProfile5
-            ImageId: !Ref ImageIdParameter
+            ## ImageId: !Ref ImageIdParameter
+            ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", ALL]
             InstanceType: !Ref InstanceTypeParameter
             KeyName: !Ref KeyNameParameter 
             # AvailabilityZone: "us-east-1b"
